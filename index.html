@@ -1,0 +1,221 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Voicer Studio — Voice Party Game</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="topbar">
+  <button class="brand" id="btn-home">🎙️ VOICER STUDIO</button>
+  <div class="topbar-right">
+    <span id="mic-status" class="mic-status">🎤 mic untested</span>
+  </div>
+</header>
+
+<main id="app">
+
+  <!-- ============ HOME ============ -->
+  <section id="screen-home" class="screen">
+    <div class="hero">
+      <h1>Your voice is the controller.</h1>
+      <p>Upload clips, perform impressions, dub over videos — and let the judges decide your fate.</p>
+      <button class="btn big ghost" id="btn-mic-check">🎤 Check my microphone</button>
+      <div id="mic-check-result" class="muted small"></div>
+    </div>
+
+    <div class="mode-grid">
+      <button class="mode-card" data-go="screen-studio-setup">
+        <div class="mode-emoji">🏆</div>
+        <h2>Studio Mode</h2>
+        <p>Hear a voice line, record your best impression, and face the judge panel. 1–4 players, pass the mic.</p>
+        <span class="tag">Classic rounds</span>
+      </button>
+      <button class="mode-card" data-go="screen-dub-setup">
+        <div class="mode-emoji">🎬</div>
+        <h2>Dub Mode</h2>
+        <p>Upload a video, mute it, and record your own voice-over over the scene. Unlimited retakes. Vote for the best dub.</p>
+        <span class="tag">Voice-over</span>
+      </button>
+      <button class="mode-card" data-go="screen-free-setup">
+        <div class="mode-emoji">⚡</div>
+        <h2>Freestyle Dub</h2>
+        <p>The clip plays once. Captions flash. You improvise the dialogue live — one take only, no safety net.</p>
+        <span class="tag">Chaos mode</span>
+      </button>
+      <button class="mode-card" data-go="screen-library">
+        <div class="mode-emoji">📦</div>
+        <h2>My Packs</h2>
+        <p>Upload your own audio prompts and video clips. Everything stays on your device, for this session.</p>
+        <span class="tag">Uploads</span>
+      </button>
+    </div>
+
+    <p class="muted small center">Best in Chrome / Edge · nothing is uploaded anywhere — files &amp; recordings stay in your browser.</p>
+  </section>
+
+  <!-- ============ LIBRARY ============ -->
+  <section id="screen-library" class="screen hidden">
+    <h1>📦 My Packs</h1>
+    <p class="muted">Each <b>folder</b> inside your <b>packs_voice</b> directory is one pack: a folder of audio files becomes a <b>Voice Pack</b> (Studio Mode), and a folder with a <b>dub_video</b> becomes a <b>Dub Pack</b> (Dub Mode) — line-by-line, timestamps included.</p>
+
+    <div id="packs-folder-banner" class="folder-banner hidden"></div>
+
+    <h3>Installed packs</h3>
+    <div id="pack-cards" class="pack-cards"></div>
+
+    <h3>Quick add (this session only)</h3>
+    <p class="muted small">No packs handy? Upload files on the fly — they last for this session. Proper packs belong in packs_voice.</p>
+
+    <label class="dropzone" id="dropzone">
+      <input type="file" id="file-input" accept="audio/*,video/*,.mkv,.avi,.flac,.mov,.mts,.wma,.opus" multiple hidden>
+      <div class="dz-big">⬆️ Click to upload or drop files here</div>
+      <div class="muted small">audio: mp3, wav, ogg, m4a · video: mp4, webm, mov</div>
+    </label>
+
+    <div id="library-list" class="lib-list"></div>
+  </section>
+
+  <!-- ============ STUDIO SETUP ============ -->
+  <section id="screen-studio-setup" class="screen hidden">
+    <h1>🏆 Studio Mode</h1>
+    <p class="muted">Listen to the line, record your impression, get judged. Highest score after all rounds wins.</p>
+
+    <div class="setup-card">
+      <h3>Players</h3>
+      <div id="studio-players" class="player-inputs"></div>
+
+      <h3>Rounds per player</h3>
+      <div class="seg" id="studio-rounds">
+        <button data-v="1">1</button><button data-v="2" class="on">2</button><button data-v="3">3</button><button data-v="4">4</button>
+      </div>
+
+      <h3>Prompt source</h3>
+      <div class="radio-rows">
+        <label><input type="radio" name="studio-src" value="builtin" checked> 🤖 Built-in lines (read aloud by a mystery robot voice)</label>
+        <label><input type="radio" name="studio-src" value="pack"> 📦 Voice pack <span class="muted small">(installed in packs_voice)</span></label>
+      </div>
+      <select id="studio-pack-select" class="select" style="margin-top:8px"></select>
+      <div class="radio-rows" style="margin-top:8px">
+        <label><input type="radio" name="studio-src" value="quick"> ⚡ Quick-add audio (uploaded this session)</label>
+      </div>
+
+      <button class="btn big primary" id="studio-start">Start the show ▶</button>
+    </div>
+  </section>
+
+  <!-- ============ STUDIO PLAY ============ -->
+  <section id="screen-studio-play" class="screen hidden">
+    <div class="hud">
+      <span id="studio-hud-round" class="hud-chip"></span>
+      <span id="studio-hud-player" class="hud-chip accent"></span>
+      <button class="btn tiny ghost" id="studio-quit">Quit</button>
+    </div>
+
+    <div id="studio-phase" class="phase-box"></div>
+  </section>
+
+  <!-- ============ DUB SETUP ============ -->
+  <section id="screen-dub-setup" class="screen hidden">
+    <h1>🎬 Dub Mode</h1>
+    <p class="muted">Pick a clip, mute the original audio, and voice it yourself. Retakes allowed — then everyone votes.</p>
+
+    <div class="setup-card">
+      <h3>Choose a scene</h3>
+      <p class="muted small">Dub packs from packs_voice appear first — with their lines and timestamps, just like the official game.</p>
+      <select id="dub-clip-select" class="select"></select>
+      <label class="btn small ghost file-btn">➕ Upload a new clip
+        <input type="file" id="dub-upload" accept="audio/*,video/*,.mkv,.avi,.flac,.mov,.mts,.wma,.opus" hidden>
+      </label>
+      <video id="dub-preview" class="media-preview" controls playsinline></video>
+
+      <h3>Clip length used (seconds)</h3>
+      <div class="seg" id="dub-length">
+        <button data-v="10">10</button><button data-v="20">20</button><button data-v="30" class="on">30</button><button data-v="60">60</button><button data-v="0">Full clip</button>
+      </div>
+
+      <h3>Original audio</h3>
+      <div class="seg" id="dub-orig">
+        <button data-v="on" class="on">🔊 Plays over my voice-over (official style)</button>
+        <button data-v="off">🔇 Muted (my voice only)</button>
+      </div>
+      <div class="muted small" style="margin-top:8px">Heads-up: with sound on, your mic hears the clip too — headphones give cleaner takes.</div>
+
+      <h3>While recording pack lines</h3>
+      <label class="switch-row">
+        <span>🎧 Hear the scene while you record<br>
+          <span class="muted small">The clip plays in your ears as you dub each line (with a short lead-in), so your timing is accurate. Headphones recommended.</span>
+        </span>
+        <span class="switch"><input type="checkbox" id="dub-hear" checked><span class="slider"></span></span>
+      </label>
+
+      <h3>Players</h3>
+      <div id="dub-players" class="player-inputs"></div>
+
+      <button class="btn big primary" id="dub-start">Start dubbing ▶</button>
+    </div>
+  </section>
+
+  <!-- ============ DUB PLAY ============ -->
+  <section id="screen-dub-play" class="screen hidden">
+    <div class="hud">
+      <span id="dub-hud-player" class="hud-chip accent"></span>
+      <span id="dub-hud-step" class="hud-chip"></span>
+      <button class="btn tiny ghost" id="dub-quit">Quit</button>
+    </div>
+    <div id="dub-phase" class="phase-box"></div>
+  </section>
+
+  <!-- ============ FREESTYLE SETUP ============ -->
+  <section id="screen-free-setup" class="screen hidden">
+    <h1>⚡ Freestyle Dub</h1>
+    <p class="muted">The clip plays once, captions flash on screen — you improvise everything live. One take. No mercy.</p>
+
+    <div class="setup-card">
+      <h3>Choose a scene</h3>
+      <select id="free-clip-select" class="select"></select>
+      <label class="btn small ghost file-btn">➕ Upload a new clip
+        <input type="file" id="free-upload" accept="audio/*,video/*,.mkv,.avi,.flac,.mov,.mts,.wma,.opus" hidden>
+      </label>
+      <video id="free-preview" class="media-preview" controls playsinline></video>
+
+      <h3>Captions</h3>
+      <div class="radio-rows">
+        <label><input type="radio" name="free-cap" value="auto" checked> 🎲 Auto captions (random chaos)</label>
+        <label><input type="radio" name="free-cap" value="custom"> ✍️ My own captions (one per line):</label>
+      </div>
+      <textarea id="free-captions" class="ta" rows="5" placeholder="Well, THAT just happened…&#10;(dramatic gasp)&#10;You were saying?"></textarea>
+
+      <h3>Original audio</h3>
+      <div class="seg" id="free-orig">
+        <button data-v="on" class="on">🔊 Plays over my voice-over (official style)</button>
+        <button data-v="off">🔇 Muted (my voice only)</button>
+      </div>
+
+      <h3>Players</h3>
+      <div id="free-players" class="player-inputs"></div>
+
+      <button class="btn big primary" id="free-start">Go live ▶</button>
+    </div>
+  </section>
+
+  <!-- ============ FREESTYLE PLAY ============ -->
+  <section id="screen-free-play" class="screen hidden">
+    <div class="hud">
+      <span id="free-hud-player" class="hud-chip accent"></span>
+      <span id="free-hud-step" class="hud-chip"></span>
+      <button class="btn tiny ghost" id="free-quit">Quit</button>
+    </div>
+    <div id="free-phase" class="phase-box"></div>
+  </section>
+
+</main>
+
+<div id="overlay" class="overlay hidden"><div id="overlay-text"></div></div>
+<div id="toast" class="toast hidden"></div>
+
+<script src="app.js"></script>
+</body>
+</html>

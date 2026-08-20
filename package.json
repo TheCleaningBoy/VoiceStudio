@@ -1,0 +1,36 @@
+{
+  "name": "voicer-studio",
+  "productName": "Voicer Studio",
+  "version": "1.3.1",
+  "description": "A mic party game \u2014 impressions, dubs and freestyle voice-overs over your own clips.",
+  "author": "Voicer Studio",
+  "license": "MIT",
+  "main": "desktop/main.js",
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-builder --win portable"
+  },
+  "build": {
+    "appId": "studio.voicer.app",
+    "productName": "Voicer Studio",
+    "directories": {
+      "buildResources": "desktop/build"
+    },
+    "files": [
+      "desktop/**/*",
+      "index.html",
+      "style.css",
+      "app.js"
+    ],
+    "win": {
+      "target": "portable"
+    },
+    "portable": {
+      "artifactName": "VoicerStudio.exe"
+    }
+  },
+  "devDependencies": {
+    "electron": "27.3.11",
+    "electron-builder": "^26.15.3"
+  }
+}
